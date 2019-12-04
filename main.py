@@ -14,13 +14,20 @@ class InstagramBot():
     def signIn(self):
         self.browser.get('https://www.instagram.com/accounts/login/')
 
+        time.sleep(1)
+
         emailInput = self.browser.find_elements_by_css_selector('form input')[0]
         passwordInput = self.browser.find_elements_by_css_selector('form input')[1]
 
         emailInput.send_keys(self.email)
         passwordInput.send_keys(self.password)
         passwordInput.send_keys(Keys.ENTER)
-        time.sleep(2)
+        time.sleep(3)
+
+        buttons = self.browser.find_elements_by_css_selector('button')
+
+        notNowButton = list(filter(lambda button: button.text == 'Not Now', buttons))[0]
+        notNowButton.click()
 
     def followWithUsername(self, username):
         self.browser.get('https://www.instagram.com/' + username + '/')
@@ -68,8 +75,48 @@ class InstagramBot():
                 break
         return followers
 
+    def likePostsWithHashtag(self, hashtag, m=1000):
+        self.loadHashtag(hashtag)
+        posts = list(filter(lambda x: x.text == '', self.browser.find_elements_by_css_selector('a')))
+        post = posts[0]
+        post.click()
+        time.sleep(2)
+        like_xpath = '//html/body/div[4]/div[2]/div/article/div[2]/section[1]/span[1]/button/span'
+        for i in range(m):
+            like_button = self.browser.find_element_by_xpath(like_xpath)
+            like_button.click()
+            time.sleep(1)
+            print()
+            next_button = list(filter(lambda x: x.text == 'Next', self.browser.find_elements_by_css_selector('a')))[0]
+            next_button.click()
+            time.sleep(1)
+
+
+    def loadHashtag(self, hashtag):
+    	self.browser.get('https://www.instagram.com/explore/tags/' + hashtag + '/')
+
     def closeBrowser(self):
         self.browser.close()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.closeBrowser()
+
+
+username = 'lolaaron'
+password = 'spartan117s'
+bot = InstagramBot(username, password)
+while True:
+    key = input('0 -> End\n1 -> Sign In \n2 -> Like Posts With Hashtag \n')
+    if key == '0':
+        bot.exit()
+        exit()
+    elif key == '1':
+    	bot.signIn()
+    elif key == '2':
+        hashtag = input('Hashtag: ')
+        m = int(input('Maximum Posts to Like: '))
+        bot.likePostsWithHashtag(hashtag, m)
+    elif key == 'b': #for developer to run in interactive mode
+        break
+    else:
+    	print('Not acceptable action')
