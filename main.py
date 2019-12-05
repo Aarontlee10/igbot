@@ -75,21 +75,26 @@ class InstagramBot():
                 break
         return followers
 
-    def likePostsWithHashtag(self, hashtag, m=1000):
+    def likePostsWithHashtag(self, hashtag, interval, m=1000):
         self.loadHashtag(hashtag)
         posts = list(filter(lambda x: x.text == '', self.browser.find_elements_by_css_selector('a')))
         post = posts[0]
         post.click()
         time.sleep(2)
         like_xpath = '//html/body/div[4]/div[2]/div/article/div[2]/section[1]/span[1]/button/span'
-        for i in range(m):
+        for i in range(m):        
             like_button = self.browser.find_element_by_xpath(like_xpath)
-            like_button.click()
-            time.sleep(1)
-            print()
+            try:
+            	like_button.click()
+            except:
+            	continue
+            time.sleep(interval)
             next_button = list(filter(lambda x: x.text == 'Next', self.browser.find_elements_by_css_selector('a')))[0]
-            next_button.click()
-            time.sleep(1)
+            try:
+            	next_button.click()
+            except:
+            	continue
+            time.sleep(interval)
 
 
     def loadHashtag(self, hashtag):
@@ -102,9 +107,12 @@ class InstagramBot():
         self.closeBrowser()
 
 
-username = 'lolaaron'
-password = 'spartan117s'
-bot = InstagramBot(username, password)
+username = input('Username: ')
+password = input('Password: ')
+try:
+    bot = InstagramBot(username, password)
+except:
+    exit()
 while True:
     key = input('0 -> End\n1 -> Sign In \n2 -> Like Posts With Hashtag \n')
     if key == '0':
@@ -115,7 +123,8 @@ while True:
     elif key == '2':
         hashtag = input('Hashtag: ')
         m = int(input('Maximum Posts to Like: '))
-        bot.likePostsWithHashtag(hashtag, m)
+        interval = int(input('Interval: '))
+        bot.likePostsWithHashtag(hashtag, interval, m)
     elif key == 'b': #for developer to run in interactive mode
         break
     else:
